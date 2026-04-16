@@ -190,7 +190,7 @@ def _apify_run(keyword: str, city: str, max_results: int) -> list:
     if not token or token.startswith("YOUR_"):
         raise ValueError("Set APIFY_TOKEN in .env")
 
-    fetch_target = max_results * 3
+    fetch_target = max_results * 2
     query = f"{keyword} in {city}"
 
     payload = {
