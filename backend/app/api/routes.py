@@ -1,0 +1,156 @@
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, Field
+from typing import List, Dict, Any, Optional
+
+from app.scrapers.google_places import search_google_places
+from app.services.database import save_leads, get_leads, get_all_cities, get_categories_for_city, check_existing
+
+router = APIRouter(prefix="/api", tags=["leads"])
+
+
+# ─── Request / Response models ────────────────────────────
+
+class SearchRequest(BaseModel):
+    keyword: str = Field(..., min_length=2)
+    city: str = Field(..., min_length=2)
+    max_results: int = Field(default=20, ge=1, le=200)
+
+
+class SearchResponse(BaseModel):
+    status: str
+    message: str
+    count: int
+    rows: List[Dict[str, Any]]
+    from_cache: bool = False
+
+
+class LeadsResponse(BaseModel):
+    city: str
+    category: str
+    count: int
+    rows: List[Dict[str, Any]]
+
+
+# ─── Endpoints ────────────────────────────────────────────
+
+@router.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+@router.post("/search", response_model=SearchResponse)
+def search_vendors(req: SearchRequest):
+    """
+    Main endpoint. Checks Supabase first — if data exists, returns cached.
+    If not, scrapes via Google Places API and saves to Supabase.
+    """
+    city = req.city.strip().lower()
+    keyword = req.keyword.strip().lower()
+
+    # Check if we already have data
+    existing_count = check_existing(city, keyword)
+
+    if existing_count > 0:
+        rows = get_leads(city, keyword)
+        msg = (
+            f"Showing {len(rows)} saved result(s) for '{keyword}' in '{city}'. "
+            f"You asked for {req.max_results}. "
+            f"Click below to fetch fresh data from Apify if needed."
+        )
+        return SearchResponse(
+            status="ok",
+            message=msg,
+            count=len(rows),
+            rows=rows,
+            from_cache=True,
+        )
+
+    # No cached data — scrape fresh
+    try:
+        rows = search_google_places(
+            keyword=req.keyword,
+            city=req.city,
+            max_results=req.max_results,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
+
+    if not rows:
+        return SearchResponse(
+            status="ok",
+            message=f"No results found for '{keyword}' in '{city}'",
+            count=0,
+            rows=[],
+            from_cache=False,
+        )
+
+    # Save to Supabase
+    try:
+        saved = save_leads(rows)
+        print(f"[DB] Saved {saved} rows for {keyword} in {city}")
+    except Exception as e:
+        print(f"[DB] Save failed: {e}")
+        # Still return results even if save fails
+
+    return SearchResponse(
+        status="ok",
+        message=f"Found {len(rows)} new results for '{keyword}' in '{city}'",
+        count=len(rows),
+        rows=rows,
+        from_cache=False,
+    )
+
+
+@router.post("/search/fresh", response_model=SearchResponse)
+def search_fresh(req: SearchRequest):
+    """Force a fresh scrape even if cached data exists."""
+    try:
+        rows = search_google_places(
+            keyword=req.keyword,
+            city=req.city,
+            max_results=req.max_results,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
+
+    if rows:
+        try:
+            save_leads(rows)
+        except Exception as e:
+            print(f"[DB] Save failed: {e}")
+
+    return SearchResponse(
+        status="ok",
+        message=f"Fresh search: {len(rows)} results for '{req.keyword}' in '{req.city}'",
+        count=len(rows),
+        rows=rows,
+        from_cache=False,
+    )
+
+
+@router.get("/leads/{city}")
+def get_city_leads(city: str, category: Optional[str] = None):
+    """Get saved leads for a city, optionally filtered by category."""
+    rows = get_leads(city, category or "")
+    return LeadsResponse(
+        city=city,
+        category=category or "all",
+        count=len(rows),
+        rows=rows,
+    )
+
+
+@router.get("/cities")
+def list_cities():
+    """Get all cities that have saved data."""
+    return {"cities": get_all_cities()}
+
+
+@router.get("/categories/{city}")
+def list_categories(city: str):
+    """Get all categories saved for a city."""
+    return {"city": city, "categories": get_categories_for_city(city)}
