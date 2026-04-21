@@ -57,7 +57,7 @@ export default function App() {
     <div className="app">
       <header className="header">
         <div className="header-inner">
-          <h1 className="logo">Hagerstone <span>Lead Scraper</span></h1>
+          <h1 className="logo">Hagerstone <span>Data Scraper</span></h1>
           <nav className="nav">
             <button
               className={`nav-btn ${view === "search" ? "active" : ""}`}
