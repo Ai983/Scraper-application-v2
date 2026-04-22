@@ -220,6 +220,13 @@ body {
 }
 .btn-secondary:hover { background: var(--accent-light); }
 
+/* Clear filters button — sized to match the dropdowns next to it */
+.btn-clear-filter {
+  margin-top: 0;
+  padding: 10px 16px;
+  white-space: nowrap;
+}
+
 .btn-download {
   background: var(--green);
   color: white;
@@ -406,12 +413,18 @@ tbody tr:hover { background: #f8f9fb; }
 
 /* Mobile landscape & small tablet */
 @media (max-width: 768px) {
-  /* Header stays horizontal but compact */
-  .header { padding: 0 16px; }
-  .header-inner { height: 56px; }
+  /* Header — allow nav to wrap onto its own row if too tight */
+  .header { padding: 8px 16px; }
+  .header-inner {
+    height: auto;
+    min-height: 56px;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 6px 0;
+  }
   .logo { font-size: 16px; }
-  .nav { gap: 2px; }
-  .nav-btn { padding: 6px 12px; font-size: 13px; }
+  .nav { gap: 2px; flex-wrap: wrap; }
+  .nav-btn { padding: 8px 12px; font-size: 13px; min-height: 36px; }
 
   .main {
     padding: 16px;
@@ -510,10 +523,19 @@ tbody tr:hover { background: #f8f9fb; }
 
 /* Small mobile phones */
 @media (max-width: 480px) {
-  .header { padding: 0 12px; }
-  .header-inner { height: 52px; }
-  .logo { font-size: 14px; }
-  .nav-btn { padding: 6px 10px; font-size: 12px; }
+  .header { padding: 8px 12px; }
+  .header-inner { min-height: 52px; padding: 4px 0; }
+  .logo { font-size: 14px; flex: 1; min-width: 0; }
+  .nav { width: 100%; justify-content: stretch; }
+  .nav-btn {
+    flex: 1;
+    padding: 8px 6px;
+    font-size: 12px;
+    text-align: center;
+    min-height: 40px;
+  }
+  /* Clear filters button stacks below dropdowns on tiny screens */
+  .btn-clear-filter { width: 100%; }
 
   .main { padding: 12px; gap: 12px; }
   .card { padding: 14px; border-radius: 8px; }
