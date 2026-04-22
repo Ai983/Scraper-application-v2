@@ -290,10 +290,125 @@ tbody tr:hover { background: #f8f9fb; }
 
 /* ── Responsive ──────────────────────── */
 
+/* Tablet & smaller laptop */
+@media (max-width: 1024px) {
+  .header,
+  .main {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .card { padding: 20px; }
+  .results-header { padding: 16px 20px; }
+}
+
+/* Mobile landscape & small tablet */
 @media (max-width: 768px) {
-  .header-inner { flex-direction: column; height: auto; padding: 12px 0; gap: 8px; }
-  .main { padding: 16px; }
-  .form-row, .filter-row { flex-direction: column; }
-  .field-small { max-width: none; }
-  table { min-width: 900px; }
+  /* Header stays horizontal but compact */
+  .header { padding: 0 16px; }
+  .header-inner { height: 56px; }
+  .logo { font-size: 16px; }
+  .nav { gap: 2px; }
+  .nav-btn { padding: 6px 12px; font-size: 13px; }
+
+  .main {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  /* Cards */
+  .card { padding: 18px; border-radius: 10px; }
+  .card h2 { font-size: 18px; }
+  .card-desc { font-size: 13px; margin-bottom: 16px; }
+
+  /* Forms */
+  .form-row,
+  .filter-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .field { min-width: 0; width: 100%; }
+  .field-small { max-width: none; min-width: 0; }
+  .field input,
+  .field select {
+    padding: 12px 14px;
+    font-size: 16px;  /* prevents iOS auto-zoom on focus */
+    min-height: 44px;  /* touch-friendly */
+  }
+
+  /* Buttons full width on mobile */
+  .btn-primary {
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 15px;
+    min-height: 48px;
+  }
+  .btn-secondary {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+
+  /* Loading & message cards */
+  .loading-card { padding: 32px 20px; }
+  .message-card { padding: 14px 16px; font-size: 13px; }
+
+  /* Results header stacks */
+  .results-header {
+    padding: 14px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .results-header h2 { font-size: 17px; }
+
+  /* Table — horizontal scroll with visual hint */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-top: 1px solid var(--border);
+  }
+  .table-container::after {
+    content: "← swipe →";
+    display: block;
+    text-align: center;
+    color: var(--text2);
+    font-size: 11px;
+    padding: 8px;
+    background: #f8f9fb;
+    border-top: 1px solid var(--border);
+  }
+  table { min-width: 720px; font-size: 12px; }
+  th { padding: 8px 10px; font-size: 10px; }
+  td { padding: 8px 10px; }
+  .cell-name { min-width: 140px; }
+  .cell-addr { max-width: 200px; }
+  .cell-web { max-width: 130px; }
+}
+
+/* Small mobile phones */
+@media (max-width: 480px) {
+  .header { padding: 0 12px; }
+  .header-inner { height: 52px; }
+  .logo { font-size: 14px; }
+  .nav-btn { padding: 6px 10px; font-size: 12px; }
+
+  .main { padding: 12px; gap: 12px; }
+  .card { padding: 14px; border-radius: 8px; }
+  .card h2 { font-size: 17px; }
+
+  .loading-card { padding: 24px 16px; }
+  .results-header { padding: 12px 14px; }
+}
+
+/* Touch device tweaks (no hover effects on touch) */
+@media (hover: none) {
+  .btn-primary:hover,
+  .btn-secondary:hover,
+  .nav-btn:hover,
+  tbody tr:hover {
+    background: initial;
+  }
+  .btn-primary:hover { background: var(--accent); }
+  .nav-btn:hover { color: rgba(255,255,255,0.6); background: transparent; }
 }
