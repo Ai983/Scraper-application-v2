@@ -1,3 +1,51 @@
+function escapeCSV(value) {
+  if (value === null || value === undefined) return "";
+  const s = String(value);
+  // If contains comma, quote, newline — wrap in quotes and escape internal quotes
+  if (/[",\n\r]/.test(s)) {
+    return `"${s.replace(/"/g, '""')}"`;
+  }
+  return s;
+}
+
+function downloadCSV(rows) {
+  const headers = [
+    "#", "Business Name", "Phone", "Address", "GST", "Category",
+    "City", "Rating", "Reviews", "Website", "Source URL",
+  ];
+
+  const lines = [headers.join(",")];
+  rows.forEach((r, i) => {
+    lines.push([
+      i + 1,
+      escapeCSV(r.business_name),
+      escapeCSV(r.phone),
+      escapeCSV(r.address),
+      escapeCSV(r.gst),
+      escapeCSV(r.category),
+      escapeCSV(r.city),
+      r.rating ?? "",
+      r.reviews ?? 0,
+      escapeCSV(r.website),
+      escapeCSV(r.source_url),
+    ].join(","));
+  });
+
+  // BOM so Excel renders UTF-8 (Hindi/special chars) correctly
+  const csv = "﻿" + lines.join("\r\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `hagerstone-leads-${today}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 export default function ResultsTable({ rows, fromCache }) {
   if (!rows || rows.length === 0) return null;
 
@@ -9,6 +57,14 @@ export default function ResultsTable({ rows, fromCache }) {
           {fromCache && <span className="badge badge-cached">From saved data</span>}
           {!fromCache && <span className="badge badge-fresh">Fresh search</span>}
         </div>
+        <button
+          type="button"
+          className="btn-download"
+          onClick={() => downloadCSV(rows)}
+          aria-label="Download results as Excel/CSV"
+        >
+          ⬇ Download Excel
+        </button>
       </div>
 
       <div className="table-container">
