@@ -51,12 +51,21 @@ def search_vendors(req: SearchRequest):
     existing_count = check_existing(city, keyword)
 
     if existing_count > 0:
-        rows = get_leads(city, keyword)
-        msg = (
-            f"Showing {len(rows)} saved result(s) for '{keyword}' in '{city}'. "
-            f"You asked for {req.max_results}. "
-            f"Click below to fetch fresh data from Apify if needed."
-        )
+        all_cached = get_leads(city, keyword)
+        # Trim to what the user actually asked for. If we have less than
+        # requested, return everything we have and prompt for a fresh fetch.
+        rows = all_cached[: req.max_results]
+        if len(all_cached) >= req.max_results:
+            msg = (
+                f"Showing {len(rows)} saved result(s) for '{keyword}' in '{city}'. "
+                f"Click below to fetch fresh data from Apify if you want newer results."
+            )
+        else:
+            msg = (
+                f"Only {len(rows)} saved result(s) for '{keyword}' in '{city}' "
+                f"(you asked for {req.max_results}). "
+                f"Click below to fetch fresh data from Apify."
+            )
         return SearchResponse(
             status="ok",
             message=msg,

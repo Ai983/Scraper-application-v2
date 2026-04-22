@@ -10,14 +10,14 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [fromCache, setFromCache] = useState(false);
-  const [lastSearch, setLastSearch] = useState({ keyword: "", city: "" });
+  const [lastSearch, setLastSearch] = useState({ keyword: "", city: "", maxResults: 10 });
 
   const handleSearch = async (keyword, city, maxResults) => {
     setLoading(true);
     setMessage("");
     setResults([]);
     setFromCache(false);
-    setLastSearch({ keyword, city });
+    setLastSearch({ keyword, city, maxResults });
 
     try {
       const res = await api.search(keyword, city, maxResults);
@@ -41,7 +41,7 @@ export default function App() {
     setFromCache(false);
 
     try {
-      const res = await api.searchFresh(lastSearch.keyword, lastSearch.city, 20);
+      const res = await api.searchFresh(lastSearch.keyword, lastSearch.city, lastSearch.maxResults);
       const data = res.data;
       setResults(data.rows || []);
       setFromCache(false);
