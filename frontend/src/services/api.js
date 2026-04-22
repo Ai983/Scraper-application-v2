@@ -16,4 +16,9 @@ export const api = {
   getCities: () => API.get("/cities"),
 
   getCategories: (city) => API.get(`/categories/${city}`),
+
+  setShortlist: (leadId, isShortlisted) =>
+    API.post(`/leads/${leadId}/shortlist`, { is_shortlisted: isShortlisted }),
+
+  getShortlisted: () => API.get("/shortlisted"),
 };

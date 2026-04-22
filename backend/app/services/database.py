@@ -40,14 +40,13 @@ from app.services.supabase_client import get_supabase
 TABLE = "vendor_leads"
 
 
-def save_leads(rows: List[Dict[str, Any]]) -> int:
-    """Insert rows into Supabase. Returns count inserted."""
+def save_leads(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Insert rows into Supabase. Returns the inserted rows including their IDs."""
     if not rows:
-        return 0
-    
+        return []
+
     db = get_supabase()
-    
-    # Remove place_id from insert if you don't want it stored (keeping it)
+
     clean_rows = []
     for r in rows:
         clean_rows.append({
@@ -75,9 +74,35 @@ def save_leads(rows: List[Dict[str, Any]]) -> int:
             "source": r.get("source", "google_places_api"),
             "place_id": r.get("place_id", ""),
         })
-    
+
     result = db.table(TABLE).insert(clean_rows).execute()
-    return len(result.data) if result.data else 0
+    return result.data if result.data else []
+
+
+def set_shortlist(lead_id: int, is_shortlisted: bool) -> Dict[str, Any]:
+    """Toggle the is_shortlisted flag on a lead. Returns the updated row."""
+    db = get_supabase()
+    result = (
+        db.table(TABLE)
+        .update({"is_shortlisted": is_shortlisted})
+        .eq("id", lead_id)
+        .execute()
+    )
+    return result.data[0] if result.data else {}
+
+
+def get_shortlisted() -> List[Dict[str, Any]]:
+    """Fetch all shortlisted leads across cities and categories."""
+    db = get_supabase()
+    result = (
+        db.table(TABLE)
+        .select("*")
+        .eq("is_shortlisted", True)
+        .order("created_at", desc=True)
+        .limit(1000)
+        .execute()
+    )
+    return result.data if result.data else []
 
 
 def get_leads(city: str, category: str = "") -> List[Dict[str, Any]]:

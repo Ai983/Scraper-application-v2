@@ -3,7 +3,15 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 
 from app.scrapers.google_places import search_google_places
-from app.services.database import save_leads, get_leads, get_all_cities, get_categories_for_city, check_existing
+from app.services.database import (
+    save_leads,
+    get_leads,
+    get_all_cities,
+    get_categories_for_city,
+    check_existing,
+    set_shortlist,
+    get_shortlisted,
+)
 
 router = APIRouter(prefix="/api", tags=["leads"])
 
@@ -95,13 +103,15 @@ def search_vendors(req: SearchRequest):
             from_cache=False,
         )
 
-    # Save to Supabase
+    # Save to Supabase and use the inserted rows (with IDs) for the response
     try:
-        saved = save_leads(rows)
-        print(f"[DB] Saved {saved} rows for {keyword} in {city}")
+        saved_rows = save_leads(rows)
+        print(f"[DB] Saved {len(saved_rows)} rows for {keyword} in {city}")
+        if saved_rows:
+            rows = saved_rows
     except Exception as e:
         print(f"[DB] Save failed: {e}")
-        # Still return results even if save fails
+        # Still return scraped results (without IDs) if save fails
 
     return SearchResponse(
         status="ok",
@@ -128,7 +138,9 @@ def search_fresh(req: SearchRequest):
 
     if rows:
         try:
-            save_leads(rows)
+            saved_rows = save_leads(rows)
+            if saved_rows:
+                rows = saved_rows
         except Exception as e:
             print(f"[DB] Save failed: {e}")
 
@@ -163,3 +175,30 @@ def list_cities():
 def list_categories(city: str):
     """Get all categories saved for a city."""
     return {"city": city, "categories": get_categories_for_city(city)}
+
+
+# ─── Shortlist endpoints ──────────────────────────────────
+
+class ShortlistRequest(BaseModel):
+    is_shortlisted: bool
+
+
+@router.post("/leads/{lead_id}/shortlist")
+def update_shortlist(lead_id: int, req: ShortlistRequest):
+    """Mark or unmark a lead as shortlisted."""
+    try:
+        updated = set_shortlist(lead_id, req.is_shortlisted)
+        if not updated:
+            raise HTTPException(status_code=404, detail=f"Lead {lead_id} not found")
+        return {"status": "ok", "lead": updated}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Update failed: {str(e)}")
+
+
+@router.get("/shortlisted")
+def list_shortlisted():
+    """Get all shortlisted leads across cities and categories."""
+    rows = get_shortlisted()
+    return {"count": len(rows), "rows": rows}

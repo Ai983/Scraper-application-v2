@@ -3,6 +3,7 @@ import { api } from "./services/api";
 import SearchForm from "./components/SearchForm";
 import ResultsTable from "./components/ResultsTable";
 import SavedData from "./components/SavedData";
+import Shortlisted from "./components/Shortlisted";
 
 export default function App() {
   const [view, setView] = useState("search"); 
@@ -71,6 +72,12 @@ export default function App() {
             >
               Saved Data
             </button>
+            <button
+              className={`nav-btn ${view === "shortlisted" ? "active" : ""}`}
+              onClick={() => setView("shortlisted")}
+            >
+              Shortlisted
+            </button>
           </nav>
         </div>
       </header>
@@ -106,6 +113,8 @@ export default function App() {
         )}
 
         {view === "saved" && <SavedData />}
+
+        {view === "shortlisted" && <Shortlisted />}
       </main>
     </div>
   );

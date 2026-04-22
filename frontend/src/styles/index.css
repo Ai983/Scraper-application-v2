@@ -357,6 +357,40 @@ tbody tr:hover { background: #f8f9fb; }
 .cell-yes { color: var(--green); font-weight: 600; }
 .cell-no { color: #b0b6c0; }
 
+/* ── Shortlist star button ───────────── */
+.cell-star { text-align: center; padding: 4px 6px; }
+.star-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+  color: #c8cdd6;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.15s;
+  font-family: var(--font);
+}
+.star-btn:hover:not(:disabled) {
+  background: var(--orange-light);
+  color: #f59e0b;
+  transform: scale(1.15);
+}
+.star-btn.active {
+  color: #f59e0b;
+  text-shadow: 0 0 1px #d97706;
+}
+.star-btn.active:hover:not(:disabled) {
+  color: #c8cdd6;
+  text-shadow: none;
+  transform: scale(1.15);
+  background: #f3f4f6;
+}
+.star-btn:disabled { opacity: 0.4; cursor: wait; }
+
+.row-shortlisted { background: #fffbeb !important; }
+.row-shortlisted:hover { background: #fef3c7 !important; }
+
 /* ── Responsive ──────────────────────── */
 
 /* Tablet & smaller laptop */
@@ -471,6 +505,7 @@ tbody tr:hover { background: #f8f9fb; }
   .cell-name { min-width: 140px; }
   .cell-addr { max-width: 200px; }
   .cell-web { max-width: 130px; }
+  .star-btn { font-size: 24px; padding: 6px 10px; min-width: 44px; min-height: 44px; }
 }
 
 /* Small mobile phones */
