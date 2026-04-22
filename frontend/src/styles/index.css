@@ -138,6 +138,56 @@ body {
 }
 .field input:disabled { background: var(--bg); cursor: not-allowed; }
 
+/* ── Stepper (number with +/- buttons) ── */
+.stepper {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.stepper:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+.stepper input {
+  flex: 1;
+  border: none;
+  text-align: center;
+  font-size: 14px;
+  font-family: var(--mono);
+  font-weight: 600;
+  color: var(--text);
+  background: transparent;
+  outline: none;
+  padding: 10px 4px;
+  min-width: 0;
+  /* hide native spinner */
+  -moz-appearance: textfield;
+}
+.stepper input::-webkit-outer-spin-button,
+.stepper input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.stepper-btn {
+  background: var(--bg);
+  border: none;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+  font-family: var(--font);
+  width: 38px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+.stepper-btn:hover:not(:disabled) { background: var(--accent-light); color: var(--accent); }
+.stepper-btn:active:not(:disabled) { background: var(--accent); color: white; }
+.stepper-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
 /* ── Buttons ─────────────────────────── */
 
 .btn-primary {
@@ -333,6 +383,17 @@ tbody tr:hover { background: #f8f9fb; }
     padding: 12px 14px;
     font-size: 16px;  /* prevents iOS auto-zoom on focus */
     min-height: 44px;  /* touch-friendly */
+  }
+
+  /* Bigger stepper buttons on touch devices */
+  .stepper input {
+    font-size: 16px;
+    padding: 12px 4px;
+  }
+  .stepper-btn {
+    width: 48px;
+    font-size: 22px;
+    min-height: 48px;
   }
 
   /* Buttons full width on mobile */

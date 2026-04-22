@@ -20,6 +20,10 @@ export default function SearchForm({ onSearch, loading }) {
   const [city, setCity] = useState("");
   const [maxResults, setMaxResults] = useState(10);
 
+  const clamp = (n) => Math.min(200, Math.max(1, n));
+  const decResults = () => setMaxResults((n) => clamp(n - 1));
+  const incResults = () => setMaxResults((n) => clamp(n + 1));
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!keyword.trim() || !city.trim()) {
@@ -71,14 +75,35 @@ export default function SearchForm({ onSearch, loading }) {
 
           <div className="field field-small">
             <label>Max Results</label>
-            <input
-              type="number"
-              min="1"
-              max="200"
-              value={maxResults}
-              onChange={(e) => setMaxResults(Math.min(200, Math.max(1, Number(e.target.value) || 1)))}
-              disabled={loading}
-            />
+            <div className="stepper">
+              <button
+                type="button"
+                className="stepper-btn"
+                onClick={decResults}
+                disabled={loading || maxResults <= 1}
+                aria-label="Decrease"
+              >
+                −
+              </button>
+              <input
+                type="number"
+                inputMode="numeric"
+                min="1"
+                max="200"
+                value={maxResults}
+                onChange={(e) => setMaxResults(clamp(Number(e.target.value) || 1))}
+                disabled={loading}
+              />
+              <button
+                type="button"
+                className="stepper-btn"
+                onClick={incResults}
+                disabled={loading || maxResults >= 200}
+                aria-label="Increase"
+              >
+                +
+              </button>
+            </div>
           </div>
         </div>
 
