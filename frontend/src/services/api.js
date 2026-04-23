@@ -4,10 +4,10 @@ const BASE = import.meta.env.VITE_API_URL;
 const API = axios.create({ baseURL: `${BASE}/api`, timeout: 300000 });
 
 export const api = {
-  search: (keyword, city, max_results = 10) =>
+  search: (keyword, city, max_results = 5) =>
     API.post("/search", { keyword, city, max_results }),
 
-  searchFresh: (keyword, city, max_results = 10) =>
+  searchFresh: (keyword, city, max_results = 5) =>
     API.post("/search/fresh", { keyword, city, max_results }),
 
   getLeads: (city, category) =>

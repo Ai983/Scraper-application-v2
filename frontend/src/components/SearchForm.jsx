@@ -18,9 +18,9 @@ const CITIES = [
 export default function SearchForm({ onSearch, loading }) {
   const [keyword, setKeyword] = useState("");
   const [city, setCity] = useState("");
-  const [maxResults, setMaxResults] = useState(10);
+  const [maxResults, setMaxResults] = useState(5);
 
-  const clamp = (n) => Math.min(200, Math.max(1, n));
+  const clamp = (n) => Math.min(50, Math.max(1, n));
   const decResults = () => setMaxResults((n) => clamp(n - 1));
   const incResults = () => setMaxResults((n) => clamp(n + 1));
 
@@ -89,7 +89,7 @@ export default function SearchForm({ onSearch, loading }) {
                 type="number"
                 inputMode="numeric"
                 min="1"
-                max="200"
+                max="50"
                 value={maxResults}
                 onChange={(e) => setMaxResults(clamp(Number(e.target.value) || 1))}
                 disabled={loading}
@@ -98,7 +98,7 @@ export default function SearchForm({ onSearch, loading }) {
                 type="button"
                 className="stepper-btn"
                 onClick={incResults}
-                disabled={loading || maxResults >= 200}
+                disabled={loading || maxResults >= 50}
                 aria-label="Increase"
               >
                 +

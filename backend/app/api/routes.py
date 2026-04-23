@@ -22,7 +22,7 @@ router = APIRouter(prefix="/api", tags=["leads"])
 class SearchRequest(BaseModel):
     keyword: str = Field(..., min_length=2)
     city: str = Field(..., min_length=2)
-    max_results: int = Field(default=20, ge=1, le=200)
+    max_results: int = Field(default=5, ge=1, le=50)
 
 
 class SearchResponse(BaseModel):

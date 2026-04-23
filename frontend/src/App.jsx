@@ -11,7 +11,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [fromCache, setFromCache] = useState(false);
-  const [lastSearch, setLastSearch] = useState({ keyword: "", city: "", maxResults: 10 });
+  const [lastSearch, setLastSearch] = useState({ keyword: "", city: "", maxResults: 5 });
 
   const handleSearch = async (keyword, city, maxResults) => {
     setLoading(true);
