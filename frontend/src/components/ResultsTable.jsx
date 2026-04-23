@@ -48,9 +48,10 @@ function downloadCSV(rows) {
   URL.revokeObjectURL(url);
 }
 
-export default function ResultsTable({ rows, fromCache, onShortlistChange }) {
+export default function ResultsTable({ rows, fromCache, onShortlistChange, onDelete }) {
   const [localRows, setLocalRows] = useState(rows);
   const [pendingId, setPendingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => setLocalRows(rows), [rows]);
 
@@ -74,6 +75,33 @@ export default function ResultsTable({ rows, fromCache, onShortlistChange }) {
       alert("Failed to update shortlist. Try again.");
     } finally {
       setPendingId(null);
+    }
+  };
+
+  const deleteRow = async (row) => {
+    if (!row.id) {
+      alert("This lead can't be deleted (not saved yet). Please retry the search.");
+      return;
+    }
+    const ok = window.confirm(
+      `Delete "${row.business_name}"?\n\nThis removes it permanently from the database. ` +
+      `It will no longer appear in any view.`
+    );
+    if (!ok) return;
+
+    setDeletingId(row.id);
+    // Optimistic remove
+    const previous = localRows;
+    setLocalRows((rs) => rs.filter((r) => r.id !== row.id));
+    try {
+      await api.deleteLead(row.id);
+      if (onDelete) onDelete(row.id);
+    } catch {
+      // Revert on error
+      setLocalRows(previous);
+      alert("Failed to delete. Try again.");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -107,6 +135,7 @@ export default function ResultsTable({ rows, fromCache, onShortlistChange }) {
               <th>Category</th>
               <th>Rating</th>
               <th>Website</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -143,6 +172,18 @@ export default function ResultsTable({ rows, fromCache, onShortlistChange }) {
                       {r.website.replace(/^https?:\/\//, "").slice(0, 30)}
                     </a>
                   ) : "—"}
+                </td>
+                <td className="cell-delete">
+                  <button
+                    type="button"
+                    className="delete-btn"
+                    onClick={() => deleteRow(r)}
+                    disabled={deletingId === r.id}
+                    aria-label="Delete this lead"
+                    title="Delete this lead"
+                  >
+                    {deletingId === r.id ? "…" : "✕"}
+                  </button>
                 </td>
               </tr>
             ))}

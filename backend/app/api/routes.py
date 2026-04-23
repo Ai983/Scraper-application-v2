@@ -11,6 +11,7 @@ from app.services.database import (
     check_existing,
     set_shortlist,
     get_shortlisted,
+    delete_lead,
 )
 
 router = APIRouter(prefix="/api", tags=["leads"])
@@ -202,3 +203,17 @@ def list_shortlisted():
     """Get all shortlisted leads across cities and categories."""
     rows = get_shortlisted()
     return {"count": len(rows), "rows": rows}
+
+
+@router.delete("/leads/{lead_id}")
+def remove_lead(lead_id: int):
+    """Permanently delete a lead from the database."""
+    try:
+        deleted = delete_lead(lead_id)
+        if not deleted:
+            raise HTTPException(status_code=404, detail=f"Lead {lead_id} not found")
+        return {"status": "ok", "deleted_id": lead_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Delete failed: {str(e)}")

@@ -59,6 +59,11 @@ export default function Shortlisted() {
     }
   };
 
+  // When a vendor is deleted entirely, drop it from the local list too
+  const handleDelete = (leadId) => {
+    setAllRows((rs) => rs.filter((r) => r.id !== leadId));
+  };
+
   const clearFilters = () => {
     setSelectedCity("");
     setSelectedCategory("");
@@ -138,6 +143,7 @@ export default function Shortlisted() {
           rows={filteredRows}
           fromCache={true}
           onShortlistChange={handleShortlistChange}
+          onDelete={handleDelete}
         />
       )}
     </div>

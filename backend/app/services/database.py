@@ -105,6 +105,13 @@ def get_shortlisted() -> List[Dict[str, Any]]:
     return result.data if result.data else []
 
 
+def delete_lead(lead_id: int) -> bool:
+    """Permanently delete a lead by its ID. Returns True if deleted."""
+    db = get_supabase()
+    result = db.table(TABLE).delete().eq("id", lead_id).execute()
+    return bool(result.data)
+
+
 def get_leads(city: str, category: str = "") -> List[Dict[str, Any]]:
     """Fetch saved leads for a city + optional category."""
     db = get_supabase()
